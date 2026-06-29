@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Transactions — FinFlow{% endblock %}
+{% block content %}
+
+<div class="section-title">All Transactions</div>
+<div class="section-sub">{{ transactions|length }} records {{ 'matching filter' if filt != 'all' else 'total' }}</div>
+
+<div class="filter-row">
+  <a href="{{ url_for('transactions_page', filter='all') }}" class="filter-btn all {{ 'active all' if filt=='all' }}">All</a>
+  <a href="{{ url_for('transactions_page', filter='income') }}" class="filter-btn income {{ 'active income' if filt=='income' }}">💰 Income</a>
+  <a href="{{ url_for('transactions_page', filter='expense') }}" class="filter-btn expense {{ 'active expense' if filt=='expense' }}">💸 Expenses</a>
+  <span class="filter-count">{{ transactions|length }} shown</span>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Date</th><th>Type</th><th>Category</th><th>Description</th><th>Amount</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for t in transactions %}
+      <tr>
+        <td style="color:#8890a8; font-weight:600;">{{ t.date }}</td>
+        <td><span class="badge {{ t.type }}">{{ '↑' if t.type=='income' else '↓' }} {{ t.type }}</span></td>
+        <td><span class="cat-pill">{{ t.category }}</span></td>
+        <td>{{ t.description or '—' }}</td>
+        <td class="amount-{{ t.type }}">{{ '+' if t.type=='income' else '-' }}₹{{ "%.0f"|format(t.amount) }}</td>
+        <td>
+          <form method="POST" action="{{ url_for('delete_transaction', txn_id=t.id) }}" onsubmit="return confirm('Delete this transaction?');">
+            <button type="submit" class="del-btn">🗑 del</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" style="text-align:center; color:#8890a8; padding:30px;">No transactions yet. <a href="{{ url_for('add_transaction') }}" style="color:#6c63ff; font-weight:700;">Add one →</a></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

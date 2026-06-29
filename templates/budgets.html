@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Budgets — FinFlow{% endblock %}
+{% block content %}
+
+<div class="section-title">🎯 Budget Setter</div>
+<div class="section-sub">Set monthly spending limits per category and track your progress</div>
+
+<div style="display:grid; grid-template-columns: 1fr 340px; gap:24px;">
+  <div>
+    {% if budgets %}
+      {% for b in budgets %}
+      <div class="budget-card">
+        <div class="budget-top">
+          <span class="budget-cat">{{ b.category }}</span>
+          <span class="budget-amounts">₹{{ "%.0f"|format(b.spent) }} / ₹{{ "%.0f"|format(b.limit) }}</span>
+        </div>
+        <div class="budget-bar-bg">
+          <div class="budget-bar-fill {{ 'over' if b.over else 'ok' }}" style="width:{{ b.pct }}%;"></div>
+        </div>
+        {% if b.over %}
+        <div class="budget-over-tag">⚠️ Over budget by ₹{{ "%.0f"|format(b.spent - b.limit) }}</div>
+        {% endif %}
+        <form method="POST" action="{{ url_for('delete_budget', category=b.category) }}" style="margin-top:10px;" onsubmit="return confirm('Remove this budget?');">
+          <button type="submit" class="del-btn">🗑 Remove budget</button>
+        </form>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="card" style="text-align:center; color:#8890a8; padding:40px;">
+        No budgets set yet. Create one using the form →
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="form-card" style="max-width:none;">
+    <div style="font-weight:800; font-size:15px;">Set a Budget</div>
+    {% if available %}
+    <form method="POST">
+      <div style="margin-bottom:16px;">
+        <label class="form-label">Category</label>
+        <select class="form-select" name="category" required>
+          {% for c in available %}
+          <option value="{{ c }}">{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div style="margin-bottom:16px;">
+        <label class="form-label">Monthly Limit (₹)</label>
+        <input class="form-input" type="number" step="0.01" name="monthly_limit" placeholder="e.g. 5000" required>
+      </div>
+      <button class="btn btn-primary" type="submit" style="width:100%;">Set Budget</button>
+    </form>
+    {% else %}
+      <div style="color:#8890a8; font-size:13px; margin-top:17px;">You've set a budget for every category 🎉</div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block title %}AI Analyzer — FinFlow{% endblock %}
+{% block content %}
+
+<div class="ai-banner">
+  <div class="ai-banner-icon">🤖</div>
+  <div class="ai-banner-title">AI Document Analyzer</div>
+  <div class="ai-banner-sub">Upload a Google Pay / PhonePe screenshot, receipt photo, or text file — transactions are magically extracted using Gemini Vision AI.</div>
+</div>
+
+<div id="uploadSection">
+  <div class="upload-grid">
+    <label class="upload-box img" for="imgInput">
+      <span class="upload-icon">🖼️</span>
+      <span class="upload-title">Upload Image</span>
+      <span class="upload-sub">JPG · PNG · WEBP · Screenshot</span>
+      <input id="imgInput" type="file" accept="image/*" style="display:none;" onchange="handleFile(this.files[0])">
+    </label>
+    <label class="upload-box file" for="fileInput">
+      <span class="upload-icon">📄</span>
+      <span class="upload-title">Upload File</span>
+      <span class="upload-sub">TXT · CSV · Bank statement</span>
+      <input id="fileInput" type="file" accept=".txt,.csv" style="display:none;" onchange="handleFile(this.files[0])">
+    </label>
+  </div>
+
+  <div style="text-align:center; color:#8890a8; font-size:13px; margin:14px 0 10px; font-weight:600;">— or paste text directly —</div>
+  <textarea class="ai-textarea" id="pasteText" rows="4" placeholder="Paid Rs.250 to Swiggy via GPay&#10;Received Rs.3500 Salary credited&#10;Sent Rs.120 to Uber"></textarea>
+
+  <div class="dragzone" id="dragzone">
+    <span style="font-size:26px;">📂</span>
+    <div style="font-size:12px; color:#8890a8; font-weight:600; margin-top:4px;">or drag &amp; drop any file here</div>
+  </div>
+</div>
+
+<div id="previewSection" style="display:none;"></div>
+
+<div id="actionRow" style="margin-top:16px; display:none; gap:10px;">
+  <button class="btn btn-primary" id="analyzeBtn" onclick="analyze()">✨ Analyze</button>
+  <button class="btn btn-ghost" onclick="resetAI()">Clear</button>
+</div>
+
+<div id="errorBox"></div>
+<div id="resultsSection"></div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentFile = null;
+let currentResults = null;
+
+const uploadSection = document.getElementById('uploadSection');
+const previewSection = document.getElementById('previewSection');
+const actionRow = document.getElementById('actionRow');
+const errorBox = document.getElementById('errorBox');
+const resultsSection = document.getElementById('resultsSection');
+const pasteText = document.getElementById('pasteText');
+const dragzone = document.getElementById('dragzone');
+
+function handleFile(file) {
+  if (!file) return;
+  currentFile = file;
+  pasteText.value = '';
+  errorBox.innerHTML = '';
+  resultsSection.innerHTML = '';
+
+  const isImage = file.type.startsWith('image/');
+  if (isImage) {
+    const url = URL.createObjectURL(file);
+    previewSection.innerHTML = `
+      <div class="preview-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <span style="font-weight:800;">🖼️ ${file.name}</span>
+          <button class="btn btn-ghost" onclick="resetAI()">✕ Remove</button>
+        </div>
+        <div class="preview-img-wrap"><img src="${url}"></div>
+      </div>`;
+  } else {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      previewSection.innerHTML = `
+        <div class="preview-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <span style="font-weight:800;">📄 ${file.name}</span>
+            <button class="btn btn-ghost" onclick="resetAI()">✕ Clear</button>
+          </div>
+          <textarea class="ai-textarea" rows="6" readonly>${e.target.result}</textarea>
+        </div>`;
+    };
+    reader.readAsText(file);
+  }
+
+  uploadSection.style.display = 'none';
+  previewSection.style.display = 'block';
+  actionRow.style.display = 'flex';
+}
+
+pasteText.addEventListener('input', () => {
+  if (pasteText.value.trim()) {
+    currentFile = null;
+    actionRow.style.display = 'flex';
+  } else if (!currentFile) {
+    actionRow.style.display = 'none';
+  }
+});
+
+dragzone.addEventListener('dragover', (e) => { e.preventDefault(); dragzone.classList.add('over'); });
+dragzone.addEventListener('dragleave', () => dragzone.classList.remove('over'));
+dragzone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dragzone.classList.remove('over');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+
+function resetAI() {
+  currentFile = null;
+  currentResults = null;
+  pasteText.value = '';
+  document.getElementById('imgInput').value = '';
+  document.getElementById('fileInput').value = '';
+  uploadSection.style.display = 'block';
+  previewSection.style.display = 'none';
+  actionRow.style.display = 'none';
+  errorBox.innerHTML = '';
+  resultsSection.innerHTML = '';
+}
+
+async function analyze() {
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Analyzing...';
+  errorBox.innerHTML = '';
+  resultsSection.innerHTML = '';
+
+  const formData = new FormData();
+  if (currentFile) {
+    formData.append('file', currentFile);
+  } else {
+    formData.append('text_input', pasteText.value);
+  }
+
+  try {
+    const res = await fetch("{{ url_for('analyzer_process') }}", { method: 'POST', body: formData });
+    const data = await res.json();
+
+    if (data.error) {
+      errorBox.innerHTML = `<div class="error-box">❌ ${data.error}</div>`;
+    } else if (data.transactions && data.transactions.length) {
+      currentResults = data.transactions;
+      renderResults(currentResults);
+    } else {
+      errorBox.innerHTML = `<div class="error-box">❌ No transactions detected. Try a clearer image.</div>`;
+    }
+  } catch (err) {
+    errorBox.innerHTML = `<div class="error-box">❌ Something went wrong. Please try again.</div>`;
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '✨ Analyze';
+}
+
+function renderResults(results) {
+  let html = `
+    <div style="margin-top:20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+        <div>
+          <div style="font-weight:900; font-size:17px;">✅ Found ${results.length} transaction${results.length !== 1 ? 's' : ''}</div>
+          <div style="font-size:12px; color:#8890a8; margin-top:2px;">Review and import below</div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-ghost" onclick="resetAI()">Try Another</button>
+          <button class="btn btn-green" onclick="importAll()">Import All →</button>
+        </div>
+      </div>`;
+  results.forEach(r => {
+    const sign = r.type === 'income' ? '+' : '-';
+    const color = r.type === 'income' ? '#00c48c' : '#ff4d6d';
+    const arrow = r.type === 'income' ? '↑' : '↓';
+    html += `
+      <div class="result-item">
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <span class="badge ${r.type}">${arrow} ${r.type}</span>
+          <span style="font-size:13px; font-weight:700;">${r.description}</span>
+          <span style="font-size:12px; color:#8890a8;">${r.category} · ${r.date}</span>
+        </div>
+        <span style="color:${color}; font-weight:900; font-size:15px;">${sign}₹${Math.round(r.amount)}</span>
+      </div>`;
+  });
+  html += `</div>`;
+  resultsSection.innerHTML = html;
+}
+
+async function importAll() {
+  if (!currentResults) return;
+  const res = await fetch("{{ url_for('analyzer_import') }}", {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ transactions: currentResults })
+  });
+  const data = await res.json();
+  window.location.href = "{{ url_for('transactions_page') }}";
+}
+</script>
+{% endblock %}

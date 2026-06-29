@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — FinFlow{% endblock %}
+{% block content %}
+
+<div class="stats-grid">
+  <div class="stat-card income">
+    <span class="stat-icon">💰</span>
+    <div class="stat-label">Total Income</div>
+    <div class="stat-value">₹{{ "%.0f"|format(total_income) }}</div>
+    <div class="stat-deco"></div>
+  </div>
+  <div class="stat-card expense">
+    <span class="stat-icon">💸</span>
+    <div class="stat-label">Total Expenses</div>
+    <div class="stat-value">₹{{ "%.0f"|format(total_expense) }}</div>
+    <div class="stat-deco"></div>
+  </div>
+  <div class="stat-card balance">
+    <span class="stat-icon">⚖️</span>
+    <div class="stat-label">Net Balance</div>
+    <div class="stat-value">₹{{ "%.0f"|format(balance) }}</div>
+    <div class="stat-deco"></div>
+  </div>
+</div>
+
+<div class="charts-grid">
+  <div class="card border-teal">
+    <div class="card-title title-teal">📈 Spending Trend</div>
+    <canvas id="trendChart" height="200"></canvas>
+  </div>
+  <div class="card border-purple">
+    <div class="card-title title-purple">🍕 Expense by Category</div>
+    <canvas id="catChart" height="200"></canvas>
+  </div>
+</div>
+
+<div class="card border-orange" style="margin-bottom:18px;">
+  <div class="card-title title-orange">📊 Income vs Expenses by Day</div>
+  <canvas id="barChart" height="180"></canvas>
+</div>
+
+{% if budget_progress %}
+<div class="card border-accent" style="margin-bottom:18px;">
+  <div class="card-title" style="color:#0ad2f1;">🎯 Budget Status (this month)</div>
+  {% for b in budget_progress %}
+  <div style="margin-bottom:14px;">
+    <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+      <span style="font-weight:700;">{{ b.category }}</span>
+      <span style="color:#8890a8;">₹{{ "%.0f"|format(b.spent) }} / ₹{{ "%.0f"|format(b.limit) }}</span>
+    </div>
+    <div class="budget-bar-bg">
+      <div class="budget-bar-fill {{ b.color }}" style="width: {{ b.pct }}%;"></div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if cat_totals %}
+<div class="mini-grid">
+  {% for cat, val in cat_totals.items() %}
+  {% if loop.index <= 4 %}
+  <div class="mini-card">
+    <span class="mini-label">{{ cat }}</span>
+    <span class="mini-value" style="color: {{ ['#ff4d6d','#3b82f6','#f59e0b','#a855f7','#00c48c','#ec4899','#6c63ff','#06b6d4','#ff8c42','#8890a8'][loop.index0 % 10] }};">₹{{ "%.0f"|format(val) }}</span>
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+  const dailyData =  {{daily_series| tojson}} ;
+  const catTotals = {{ cat_totals|tojson}} ;
+
+  // Trend (area-ish line) chart
+  new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+      labels: dailyData.map(d => d.date),
+      datasets: [
+        { label:'Income', data: dailyData.map(d=>d.income), borderColor:'#00c48c', backgroundColor:'rgba(0,196,140,0.15)', fill:true, tension:0.3 },
+        { label:'Expense', data: dailyData.map(d=>d.expense), borderColor:'#ff4d6d', backgroundColor:'rgba(255,77,109,0.12)', fill:true, tension:0.3 }
+      ]
+    },
+    options: { responsive:true, plugins:{legend:{position:'bottom', labels:{boxWidth:10,font:{size:11}}}}, scales:{x:{ticks:{font:{size:9}}},y:{ticks:{font:{size:9}}}} }
+  });
+
+  // Category pie/donut
+  const catColors = ['#ff4d6d','#3b82f6','#f59e0b','#a855f7','#00c48c','#ec4899','#6c63ff','#06b6d4','#ff8c42','#8890a8'];
+  new Chart(document.getElementById('catChart'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(catTotals),
+      datasets: [{ data: Object.values(catTotals), backgroundColor: catColors, borderWidth:2, borderColor:'#fff' }]
+    },
+    options: { responsive:true, plugins:{legend:{position:'bottom', labels:{boxWidth:10,font:{size:10}}}} }
+  });
+
+  // Bar chart
+  new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: dailyData.map(d => d.date),
+      datasets: [
+        { label:'Income', data: dailyData.map(d=>d.income), backgroundColor:'#00c48c', borderRadius:6 },
+        { label:'Expense', data: dailyData.map(d=>d.expense), backgroundColor:'#ff8c42', borderRadius:6 }
+      ]
+    },
+    options: { responsive:true, plugins:{legend:{position:'bottom', labels:{boxWidth:10,font:{size:11}}}}, scales:{x:{ticks:{font:{size:9}}},y:{ticks:{font:{size:9}}}} }
+  });
+</script>
+{% endblock %}

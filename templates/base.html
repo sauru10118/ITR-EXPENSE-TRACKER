@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}FinFlow{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  {% if username %}
+  <nav class="navbar">
+    <div class="nav-logo">💸 FinFlow</div>
+    <a href="{{ url_for('dashboard') }}" class="nav-link {{ 'active' if request.endpoint=='dashboard' }}">📊 Dashboard</a>
+    <a href="{{ url_for('transactions_page') }}" class="nav-link {{ 'active' if request.endpoint=='transactions_page' }}">📋 Transactions</a>
+    <a href="{{ url_for('add_transaction') }}" class="nav-link {{ 'active' if request.endpoint=='add_transaction' }}">➕ Add</a>
+    <a href="{{ url_for('budgets_page') }}" class="nav-link {{ 'active' if request.endpoint=='budgets_page' }}">🎯 Budgets</a>
+    <a href="{{ url_for('analyzer_page') }}" class="nav-link {{ 'active' if request.endpoint=='analyzer_page' }}">🤖 AI Analyzer</a>
+    <div class="nav-spacer"></div>
+    <span class="nav-user">👤 {{ username }}</span>
+    <a href="{{ url_for('logout') }}" class="nav-logout">Logout</a>
+  </nav>
+  {% endif %}
+
+  <div class="page-wrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </div>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>
