@@ -1,4 +1,4 @@
-# FinFlow — Personal Expense Tracker
+#  FinFlow — Personal Expense Tracker
 
 A full-stack expense tracker built with **Python (Flask)** + **SQLite** + **HTML/CSS/JS**.
 
