@@ -22,10 +22,6 @@ from werkzeug.utils import secure_filename
 from PIL import Image
 from google import genai
 
-from dotenv import load_dotenv, find_dotenv
-
-load_dotenv(find_dotenv)
-
 # ── Config ───────────────────────────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "finflow.db")
@@ -48,9 +44,10 @@ CATEGORIES = ["Food", "Transport", "Housing", "Entertainment", "Health",
 
 # ── Gemini AI Configuration ──────────────────────────────────────────────────
 
-GEMINI_API_KEY = os.environ('gemini_api_key')
+# Paste your actual API key directly inside the quotes below
+GEMINI_API_KEY = "PASTE_YOUR_API_KEY_HERE"
 
-client = genai.Client()
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 
 # ── Database setup (Flask-SQLAlchemy 3.1.1) ──────────────────────────────────
