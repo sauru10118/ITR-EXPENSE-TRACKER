@@ -33,7 +33,7 @@ app.secret_key = "finflow-dev-secret-change-this-in-production"
 app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024  # 8 MB upload limit
 
 # Flask-SQLAlchemy Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://root:root@localhost/finflow1'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://root:toor@localhost/extdb'
 
 CATEGORIES = ["Food", "Transport", "Housing", "Entertainment", "Health",
               "Shopping", "Salary", "Freelance", "Investment", "Other"]
