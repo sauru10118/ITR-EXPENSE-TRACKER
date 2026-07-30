@@ -1,254 +1,55 @@
-# 💰 FinFlow — AI-Powered Personal Expense Tracker
+# FinFlow — Personal Expense Tracker
 
-A modern full-stack personal finance application built with **Python (Flask)**, **SQLite**, **HTML**, **CSS**, and **JavaScript**. FinFlow helps users manage daily finances, monitor spending habits, set monthly budgets, and automatically extract transaction details from payment screenshots and receipts using offline OCR.
+A full-stack, aesthetically rich expense tracker built with **Python (Flask)** + **SQLite** + **HTML/CSS/JS**.
 
----
+## Features
+- 🔐 **Login & Register** — Secure user accounts with **Real Email OTP Verification** powered by Gmail SMTP. Supports multiple accounts per email.
+- 📊 **Dashboard** — Interactive income/expense stat cards, trend line charts, category donut charts, and daily bar charts.
+- 📋 **Transactions** — Add, view, filter (income/expense), and delete records easily.
+- 🎯 **Budget Setter** — Set monthly limits per category with visual progress bars and dynamic "over budget" warnings.
+- 🤖 **AI Document Analyzer** — Upload screenshots (GPay/PhonePe) or text/csv bank statements. Uses Windows Native OCR and Gemini AI for intelligent, automated transaction extraction.
 
-## ✨ Key Features
+## Setup
 
-### 🔐 Secure Authentication
-
-* User registration and login system
-* Password hashing for enhanced security
-* Individual user accounts with isolated financial data
-
-### 📈 Interactive Dashboard
-
-* Real-time financial overview
-* Total Income, Expenses, and Current Balance cards
-* Income vs Expense trend chart
-* Expense category donut chart
-* Daily spending bar chart
-
-### 💳 Transaction Management
-
-* Add income and expense records
-* View complete transaction history
-* Filter transactions by type
-* Delete unwanted records
-* Automatic balance calculation
-
-### 🎯 Smart Budget Planner
-
-* Create monthly category-wise budgets
-* Live budget progress indicators
-* Visual progress bars
-* Instant "Over Budget" alerts
-* Spending analysis by category
-
-### 🤖 AI Document Analyzer (Offline)
-
-Upload any of the following:
-
-* Google Pay screenshots
-* PhonePe screenshots
-* Paytm screenshots
-* Receipt images
-* Bank statements (.txt / .csv)
-
-The application uses:
-
-* **Tesseract OCR** for text extraction
-* Local pattern matching for transaction analysis
-
-Automatically detects:
-
-* Transaction Type (Income / Expense)
-* Amount
-* Category
-* Date
-
-✅ Works completely offline
-✅ No API key required
-✅ Privacy-friendly document processing
-
----
-
-# 🚀 Tech Stack
-
-| Technology    | Purpose                   |
-| ------------- | ------------------------- |
-| Python        | Backend                   |
-| Flask         | Web Framework             |
-| SQLite        | Database                  |
-| HTML5         | Frontend Structure        |
-| CSS3          | Styling                   |
-| JavaScript    | Client-side Functionality |
-| Chart.js      | Data Visualization        |
-| Tesseract OCR | Text Extraction           |
-| Jinja2        | Template Engine           |
-
----
-
-# 📂 Project Structure
-
-```text
-expense_tracker/
-│
-├── app.py                     # Main Flask application
-├── requirements.txt           # Python dependencies
-├── finflow.db                 # SQLite database (auto-created)
-├── uploads/                   # Temporary uploaded files
-│
-├── static/
-│   └── style.css              # Application styling
-│
-└── templates/
-    ├── base.html
-    ├── login.html
-    ├── register.html
-    ├── dashboard.html
-    ├── transactions.html
-    ├── add_transaction.html
-    ├── budgets.html
-    └── analyzer.html
-```
-
----
-
-# ⚙️ Installation
-
-## 1. Clone the Repository
-
+### 1. Install Python dependencies
+Make sure you have Python installed, then run:
 ```bash
-git clone https://github.com/your-username/FinFlow.git
-
-cd FinFlow
+pip install -r requirement.txt
 ```
 
----
+### 2. Configure Email Settings (For OTP)
+Open `app.py` and ensure the email and App Password variables are set to your Gmail account so the app can send real OTP verification emails during registration.
 
-## 2. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-## 3. Start the Application
-
+### 3. Run the app
 ```bash
 python app.py
 ```
 
----
+### 4. Open your browser
+Go to **http://localhost:5000** — you'll land on the login page. Click "Register" to create your first account. You will receive an email with a 6-digit code to verify your account!
 
-## 4. Open in Browser
-
+## Project Structure
 ```
-http://localhost:5000
-```
-
-Create a new account using the **Register** page and start tracking your finances.
-
----
-
-# 📊 Dashboard Overview
-
-* Financial Summary Cards
-* Monthly Income & Expense Trends
-* Category-wise Expense Distribution
-* Daily Spending Analytics
-* Current Balance Monitoring
-
----
-
-# 📑 Transaction Features
-
-* Add Income
-* Add Expense
-* Transaction History
-* Filter by Type
-* Delete Transactions
-* Automatic Balance Updates
-
----
-
-# 💹 Budget Management
-
-* Monthly Category Budgets
-* Live Spending Progress
-* Budget Usage Percentage
-* Overspending Notifications
-* Category Performance Tracking
-
----
-
-# 🤖 AI OCR Analyzer
-
-Supported Files:
-
-* PNG
-* JPG
-* JPEG
-* TXT
-* CSV
-
-Automatically extracts:
-
-* Transaction Amount
-* Date
-* Category
-* Income / Expense Type
-
-No internet connection required.
-
----
-
-# 🔒 Security
-
-* Passwords stored using secure hashing
-* User-specific data isolation
-* Session-based authentication
-* Offline OCR processing for improved privacy
-
----
-
-# 📦 Database
-
-FinFlow uses **SQLite**, making deployment simple and lightweight.
-
-Database file:
-
-```
-finflow.db
+expense_tracker/
+├── app.py                 # Core Flask app — routes, DB logic, OTP & OCR integration
+├── requirement.txt        # All Python dependencies
+├── finflow.db             # SQLite database (auto-created on first run)
+├── uploads/               # Temporary storage for uploaded files (auto-cleared)
+├── static/
+│   └── style.css          # Rich, modern UI styles with smooth gradients and hover effects
+└── templates/
+    ├── base.html          # Shared layout & navigation
+    ├── login.html         # Login page
+    ├── register.html      # Registration page
+    ├── verify_otp.html    # Interactive 6-digit OTP verification page
+    ├── dashboard.html     # Charts (Chart.js) and stat grid
+    ├── transactions.html  # Transaction table and filters
+    ├── add_transaction.html 
+    ├── budgets.html       # Monthly budget forms
+    └── analyzer.html      # AI upload and results UI
 ```
 
-Backup is as easy as copying this single file.
-
----
-
-# 📌 Future Enhancements
-
-* Export to Excel and PDF
-* Dark Mode
-* Email Reports
-* Multi-Currency Support
-* Recurring Transactions
-* Cloud Backup
-* Mobile Responsive Dashboard
-* AI Spending Insights
-* Data Import from Bank Statements
-* Expense Prediction using Machine Learning
-
----
-
-# 🛠 Configuration
-
-Before deploying the application:
-
-* Change the `app.secret_key`
-* Disable Flask Debug Mode
-* Use a production WSGI server (Gunicorn or Waitress)
-* Store uploaded files securely
-
----
-
-# 📄 License
-
-This project is open-source and intended for educational and personal learning purposes.
-
----
-
-## ⭐ If you found this project helpful, consider giving it a star on GitHub!
+## Notes
+- Change `app.secret_key` in `app.py` before deploying anywhere public.
+- The database is a single file (`finflow.db`) — back it up by simply copying that file.
+- Each user securely sees only their own transactions and budgets.
