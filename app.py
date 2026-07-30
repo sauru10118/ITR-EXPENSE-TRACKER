@@ -3,19 +3,21 @@ FinFlow — Personal Expense Tracker
 Flask + Flask-SQLAlchemy 3.1.1 + Gemini AI Vision Analyzer
 
 Setup:
-    pip install Flask-SQLAlchemy==3.1.1 google-genai pillow
+    pip install Flask-SQLAlchemy==3.1.1 google-genai pillow python-dotenv
     python app.py
 """
 
 import os
-import json
-import re
 import random
+import re
 import smtplib
+from datetime import datetime, date, timedelta
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from datetime import datetime, date, timedelta
 from functools import wraps
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
 from flask_sqlalchemy import SQLAlchemy
@@ -49,8 +51,8 @@ CATEGORIES = ["Food", "Transport", "Housing", "Entertainment", "Health",
 #   1. Go to https://myaccount.google.com/apppasswords
 #   2. Generate an App Password for "Mail"
 #   3. Paste the 16-character password below (no spaces)
-EMAIL_SENDER = "sauru10118@gmail.com"          # Your Gmail address
-EMAIL_APP_PASSWORD = "ltfw ndkj uyha ftox"    # 16-char Gmail App Password
+EMAIL_SENDER = os.getenv("EMAIL_SENDER", "sauru10118@gmail.com")
+EMAIL_APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 OTP_EXPIRY_MINUTES = 5
@@ -823,3 +825,4 @@ if __name__ == "__main__":
     print("  Open your browser at: http://localhost:5000")
     print("=" * 60)
     app.run(debug=True, host="0.0.0.0", port=5000)
+    
